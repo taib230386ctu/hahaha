@@ -55,14 +55,13 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    gap: 10px;
     flex-shrink: 0;
     cursor: pointer;
     text-decoration: none;
 }
 
 .logo img {
-    width: 70px;
+    width: 90px;
     height: auto;
     display: block;
     margin: 0;
@@ -134,7 +133,6 @@ body {
     color: white;
     cursor: pointer;
 }
-
 @media screen and (max-width: 1024px){
     .nav-inner{ padding: 0 20px; }
     .menu{ gap: 25px; }
@@ -331,7 +329,7 @@ body{ overflow-x: hidden; }
 }
 .video-section-container {
     /* Đảm bảo hình nền chỉ hiện trong phạm vi khối này */
-    background: linear-gradient(rgba(5, 11, 20, 0.3), rgba(5, 11, 20, 0.3)), 
+    background: linear-gradient(rgba(5, 11, 20, 0.5), rgba(5, 11, 20, 0.3)), 
                 url('./images/bg3.png') no-repeat center center;
     
     /* Hình nền sẽ tự co giãn vừa vặn với kích thước khối */
@@ -341,7 +339,7 @@ body{ overflow-x: hidden; }
     min-height: 400px; /* Cậu có thể tùy chỉnh độ cao này */
     width: 100%;
     max-width: 1960px; /* Giới hạn độ rộng của khối */
-    margin: 40px auto; /* Căn giữa khối trong trang web */
+    margin: 0 auto; /* Căn giữa khối trong trang web */
     
     /* Bo góc để nhìn giống 1 "thẻ" hoặc "khung" ảnh hơn */
     border-radius: 25px;
@@ -409,4 +407,76 @@ body{ overflow-x: hidden; }
 
 .video-wrapper:hover .play-btn {
     opacity: 1; /* Hiện ra khi di chuột vào */
+}
+
+.section-cct{
+    background: linear-gradient(rgba(5, 11, 20, 0.6), rgba(5, 11, 20, 0.6)),
+                url('./images/bg2.png') no-repeat center center/cover;
+    min-height: 80vh;
+    padding: 0 80px;
+}
+.section-cct .section-title{
+    padding: 60px 0 40px 0;
+    text-align: center;
+    font-size: 50px;
+}
+.talk-show-mcnbd-title{
+    font-family: var(--font-art);
+    font-size: 28px;
+    color: var(--gold);
+
+}
+.cct-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start; /* Dồn hết sang trái */
+    align-items: flex-start;    /* Căn lề trên */
+    gap: 60px;                  /* Khoảng cách giữa chữ và ảnh */
+}
+.mcnbd-content{
+    display: flex;
+    gap: 50px;
+    margin: 40px 0;
+    font-size:20px;
+}
+.cct-spacer {
+    flex: 0 0 15%;
+}
+.talk-show-mcnbd {
+    flex: 0 0 25%;
+    padding-right: 20px; /* Tạo khoảng thở cho chữ không chạm vào ảnh */
+}
+/* Khối ảnh bên phải (Image Slider) */
+.image-slider {
+    flex: 0 0 50%;                    /* Chiếm phần còn lại */
+    height: 400px;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid rgba(212, 176, 106, 0.2);
+}
+
+.slide {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0;
+    /* Hiệu ứng chuyển động kéo dài 1.5 giây */
+    transition: opacity 1.5s ease-in-out; 
+}
+/* Responsive: Dồn về một cột trên mobile */
+@media screen and (max-width: 768px) {
+    .cct-wrapper {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .talk-show-mcnbd {
+        flex: 0 0 100%;
+    }
+    .image-slider {
+        width: 100%;
+    }
 }
