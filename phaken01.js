@@ -39,5 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
             video.setAttribute("controls", "true"); // Hiện thanh công cụ khi video chạy
         }
     }
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
 
+    function showSlides() {
+        slides.forEach(slide => slide.style.opacity = 0); // Ẩn hết
+        currentSlide = (currentSlide + 1) % slides.length; // Chuyển sang ảnh tiếp theo
+        slides[currentSlide].style.opacity = 1; // Hiện ảnh mới
+    }
+
+    // Chạy ngay khi tải xong
+    if(slides.length > 0) {
+        slides[0].style.opacity = 1;
+        setInterval(showSlides, 6000); 
+    }
 });
