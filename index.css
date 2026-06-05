@@ -20,14 +20,12 @@
 }
 
 body {
+    /* Mặc định chữ thường đứng thẳng đứng, không nghiêng ríu mắt */
     font-family: var(--font-text);
-    /* Sửa lại cú pháp: xóa chữ background dư thừa và thêm fixed */
-    background: linear-gradient(rgba(5, 11, 20, 0.6), rgba(5, 11, 20, 0.6)),
-                url('./images/bg2.png') no-repeat center center / cover;
-    background-attachment: fixed; /* NỀN SẼ ĐỨNG YÊN KHI KÉO TRANG */
+    background: #050b14;
     color: white;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: scroll; /* Khóa thanh cuộn dọc cố định tránh lệch Nav */
 }
 
 /* =========================================================
@@ -38,7 +36,7 @@ body {
     top: 0; left: 0;
     width: 100%;
     z-index: 100;
-    background: rgb(5, 10, 18);
+    background: rgba(5, 10, 18, .45);
     border-bottom: 1px solid rgba(255, 255, 255, .05);
     
     /* Hiệu ứng sương mờ hạ cánh mềm mại khi tải trang */
@@ -176,7 +174,9 @@ body {
     padding: 70px 20px 80px;
 }
 
+/* 1. KHUNG CHỨA BƯỚM: Phải có relative để làm điểm tựa xếp lớp */
 .brand-image-wrapper {
+    position: relative; /* Quan trọng để bướm con bay đè lên đúng vị trí */
     width: 100%;
     max-width: 1400px;
     margin: 0 auto 20px auto;
@@ -186,19 +186,121 @@ body {
     padding: 0 20px;
 }
 
+/* 2. BƯỚM NỀN (BACKGROUND): Hiệu ứng "nhịp thở" (Pulse) mờ ảo */
 .brand-image {
     width: 100%;
     height: auto;
     display: block;
     object-fit: contain;
     object-position: center;
+    z-index: 1;
     mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    
+    /* Chuyển động tỏa sáng, phóng to thu nhỏ nhịp nhàng liên tục */
+    animation: pulseBackground 4s ease-in-out infinite alternate;
+}
+
+/* 3. BƯỚM CON BÊN TRÊN: Hiệu ứng bay bồng bềnh 3D */
+.flying-butterfly {
+    position: absolute; /* Lơ lửng đè lên bướm nền */
+    z-index: 2;
+    width: 60%; /* Tùy chỉnh độ to nhỏ của bướm bay so với bướm nền */
+    max-width: 500px; /* Không cho bướm bay bự quá trên PC */
+    filter: drop-shadow(0 0 20px rgba(212, 176, 106, 0.4)); /* Phủ sương lấp lánh vàng */
+    
+    /* Chuyển động bay lên xuống, nghiêng cánh liên tục */
+    animation: floatButterfly 6s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   ĐỊNH NGHĨA CHUYỂN ĐỘNG CHO BƯỚM (ANIMATIONS)
+   ========================================================= */
+
+/* Hiệu ứng nhịp thở cho bướm nền */
+@keyframes pulseBackground {
+    0% { 
+        transform: scale(0.98); 
+        opacity: 0.6; 
+    }
+    100% { 
+        transform: scale(1.02); 
+        opacity: 1; 
+    }
+}
+
+/* Hiệu ứng bay lượn êm ái cho bướm trên */
+@keyframes floatButterfly {
+    0% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg); 
+    }
+    33% { 
+        transform: translateY(-15px) translateX(8px) rotate(2deg); /* Lên cao, nghiêng qua phải */
+    }
+    66% { 
+        transform: translateY(10px) translateX(-5px) rotate(-1deg); /* Bay thấp, nghiêng qua trái */
+    }
+    100% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg); 
+    }
 }
 
 /* =========================================================
-   4. CÁC THÀNH PHẦN NỘI DUNG (TITLE, DESC, INPUT)
+   TỐI ƯU CHUYỂN ĐỘNG BƯỚM SIÊU MƯỢT TRÊN ĐIỆN THOẠI 📱
    ========================================================= */
+@media screen and (max-width: 768px) {
+    
+    /* Thu nhỏ kích thước bướm bay và đổi sang Animation biên độ nhỏ */
+    .flying-butterfly {
+        width: 25%; 
+        max-width: 320px;
+        filter: drop-shadow(0 0 12px rgba(212, 176, 106, 0.35)); /* Giảm bớt độ nhòe sáng */
+        
+        /* Đổi sang cụm chuyển động nhẹ floatButterflyMobile dưới đây */
+        animation: floatButterflyMobile 5s ease-in-out infinite;
+    }
+    /* Giảm luôn nhịp thở của bướm nền cho đỡ bị ngợp mắt */
+    .brand-image {
+        animation: pulseBackgroundMobile 4s ease-in-out infinite alternate;
+    }
+}
+
+
+/* =========================================================
+   ĐỊNH NGHĨA KEYFRAMES RIÊNG CHO MOBILE (BIÊN ĐỘ SIÊU NHỎ)
+   ========================================================= */
+
+/* Ép bướm con chỉ nhích nhẹ 3px - 5px bồng bềnh, nghiêng cánh cực khẽ */
+@keyframes floatButterflyMobile {
+    0% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg); 
+    }
+    33% { 
+        transform: translateY(-5px) translateX(2px) rotate(1deg); /* Chỉ nhích lên 5px thay vì 15px */
+    }
+    66% { 
+        transform: translateY(3px) translateX(-1px) rotate(-0.5deg); /* Chỉ hạ xuống 3px */
+    }
+    100% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg); 
+    }
+}
+/* Ép bướm nền đập nhịp cực khẽ, gần như giữ nguyên vị trí tránh mỏi mắt */
+@keyframes pulseBackgroundMobile {
+    0% { 
+        transform: scale(0.99); 
+        opacity: 0.7; 
+    }
+    100% { 
+        transform: scale(1.01); 
+        opacity: 1; 
+    }
+}
+
+/* =========================================================
+4. CÁC THÀNH PHẦN NỘI DUNG (TITLE, DESC, INPUT)
+========================================================= */
 .main-title {
     font-family: var(--font-art);
     font-style: normal !important;
@@ -387,8 +489,8 @@ body {
         position: relative;
     }
 
-    .logo{ display: flex; align-items: center; gap: 8px; justify-content: flex-start !important; }
-    .logo img{ width: 50px !important; height: auto; margin: 0; }
+    .logo{ display: flex; align-items: center; justify-content: flex-start !important; }
+    .logo img{ width: 80px !important; height: auto; margin: 0; }
     
     /* CO NHỎ TÊN THƯƠNG HIỆU: Đảm bảo không đẩy nút 3 gạch rớt dòng */
     .logo-text{ font-size: 22px !important; margin-left: 0 !important; }
@@ -492,5 +594,69 @@ body {
         width: 85%;
         opacity: 1;
         transform: translateX(-50%) scaleX(1);
+    }
+}
+.upload-form textarea {
+    width: 100%; 
+    min-height: 60px; /* Chiều cao mặc định ban đầu */
+    margin-bottom: 20px; 
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.5); 
+    border: 1px solid rgba(212, 176, 106, 0.2);
+    border-radius: 12px; 
+    color: #fff; 
+    font-family: var(--font-text);
+    outline: none; 
+    resize: none; /* Khóa không cho kéo tay */
+    line-height: 1.5;
+    
+    overflow-y: hidden; /* BẮT BUỘC: Ẩn thanh cuộn để ô tự giãn hoàn toàn */
+    transition: border-color 0.3s; /* Chỉ tạo hiệu ứng cho viền, không tạo hiệu ứng cho height để tránh bị giật khi gõ */
+}
+
+.upload-form textarea:focus {
+    border-color: var(--gold);
+}
+/* =========================================================
+   10. STYLE CHO NHÓM NÚT ĐĂNG BÀI & HỦY BỎ
+   ========================================================= */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Ghi đè margin của nút start-btn khi nằm trong form */
+.form-actions .start-btn {
+    flex: 2;
+    margin-top: 0; 
+}
+
+.cancel-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #888;
+    border-radius: 14px;
+    font-family: var(--font-art);
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #bbb;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Trên mobile: Ép 2 nút xếp chồng lên nhau, nút Hủy nằm dưới */
+@media screen and (max-width: 768px) {
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+    .cancel-btn {
+        height: 55px; /* Chiều cao cân đối với nút chính trên mobile */
     }
 }
