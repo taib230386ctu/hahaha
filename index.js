@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
                 const fileType = file.type;
                 const fileUrl = URL.createObjectURL(file);
-                fileNameDisplay.innerHTML = `✨ Đã nhận: <b>${file.name}</b>`;
+                fileNameDisplay.innerHTML = `Đã nhận: <b>${file.name}</b>`;
                 fileNameDisplay.style.color = '#f6d28d';
                 placeholder.style.display = 'none';
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     videoPreview.style.display = 'block';
                 }
             } else {
-                fileNameDisplay.innerText = "Cậu chưa chọn khoảnh khắc nào...";
+                fileNameDisplay.innerText = "Bạn chưa chọn khoảnh khắc nào...";
                 fileNameDisplay.style.color = '#666';
             }
         });
@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (userName === "") {
                 return Swal.fire({
-                    title: 'Tên của cậu là...',
-                    text: 'Hãy để lại một cái tên để mình biết cậu vừa ghé thăm nhé!',
+                    title: 'Tên của bạn là...',
+                    text: 'Hãy để lại một cái tên để mình biết bạn vừa ghé thăm nhé!',
                     icon: 'question',
                     confirmButtonColor: '#d4af37',
                     background: '#050b14', color: '#fff'
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 Swal.fire({
                     title: 'Đang mở kén...',
-                    html: 'Vũ trụ đang ghi nhớ tên cậu...',
+                    html: 'Vũ trụ đang ghi nhớ tên bạn...',
                     allowOutsideClick: false,
                     didOpen: () => { Swal.showLoading(); }
                 });
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 Swal.fire({
                     title: `Chào mừng ${userName}!`,
-                    html: 'Chúc cậu có một hành trình thật nhẹ nhàng tại <b>Phá Kén</b>. ✨',
+                    html: 'Chúc bạn có một hành trình thật nhẹ nhàng tại <b>Phá Kén</b>. ✨',
                     icon: 'success',
                     confirmButtonText: 'BẮT ĐẦU THÔI ✦',
                     confirmButtonColor: '#d4af37',
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (err) {
                 console.error("Firebase Visitor Error: ", err);
-                Swal.fire('Lỗi rồi!', 'Vũ trụ không thể ghi nhớ tên cậu lúc này, thử lại sau nhé!', 'error');
+                Swal.fire('Lỗi rồi!', 'Vũ trụ không thể ghi nhớ tên bạn lúc này, thử lại sau nhé!', 'error');
             }
         });
     }
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!author) {
                 return Swal.fire({
                     title: 'Khoan đã...',
-                    text: 'Hình như cậu chưa bấm "Bắt đầu hành trình" ở trên cùng thì phải?',
+                    text: 'Hình như bạn chưa bấm "Bắt đầu hành trình" ở trên cùng thì phải?',
                     icon: 'warning',
                     confirmButtonColor: '#d4b06a',
                     background: '#050b14', color: '#fff'
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!file || !title) {
                 return Swal.fire({
                     title: 'Thiếu thông tin!',
-                    text: 'Cậu nhập đầy đủ tiêu đề và chọn file trước khi thả vào Galaxy nhé!',
+                    text: 'Bạn nhập đầy đủ tiêu đề và chọn file trước khi thả vào Galaxy nhé!',
                     icon: 'warning',
                     confirmButtonColor: '#d4b06a',
                     background: '#050b14', color: '#fff'
@@ -188,9 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p style="margin-bottom: 8px; color: #fff;"><b>✦ Tiêu đề:</b> ${title}</p>
                         <p style="margin-bottom: 0; font-size: 0.85rem; color: #aaa;"><b>✦ File:</b> ${file.name}</p>
                     </div>
-                    <br><span style="font-size: 0.9rem;">Cậu có chắc muốn thả khoảnh khắc này không?</span>`,
+                    <br><span style="font-size: 0.9rem;">Bạn có chắc muốn thả khoảnh khắc này không?</span>`,
                 icon: 'question',
-                showCancelButton: true, confirmButtonColor: '#d4b06a', cancelButtonColor: '#333', confirmButtonText: 'Thả ngay! ✨',
+                showCancelButton: true, confirmButtonColor: '#d4b06a', cancelButtonColor: '#333', confirmButtonText: 'Thả vào Galaxy! ',
                 background: '#050b14', color: '#fff'
             }).then(async (result) => {
                 if (result.isConfirmed) {
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             Swal.fire({
                                 title: 'Đã gửi đi!',
-                                text: 'Khoảnh khắc của cậu đang chờ được kiểm duyệt để lấp lánh trong Galaxy nhé! ✨',
+                                text: 'Khoảnh khắc của bạn đang chờ được kiểm duyệt để lấp lánh trong Galaxy nhé! ✨',
                                 icon: 'success', confirmButtonColor: '#d4b06a', background: '#050b14', color: '#fff'
                             });
 
@@ -235,12 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             imgTitle.value = ""; fileInput.value = "";
                             imgPreview.style.display = 'none'; videoPreview.style.display = 'none';
                             placeholder.style.display = 'block';
-                            fileNameDisplay.innerText = "Cậu chưa chọn khoảnh khắc nào...";
+                            fileNameDisplay.innerText = "Bạn chưa chọn khoảnh khắc nào...";
                             fileNameDisplay.style.color = '#666';
                         }
                     } catch (error) {
                         console.error("Upload Logic Error: ", error);
-                        Swal.fire('Lỗi rồi!', 'Hệ thống vũ trụ đang bận xử lý dữ liệu, cậu thử lại sau nhé!', 'error');
+                        Swal.fire('Lỗi rồi!', 'Hệ thống vũ trụ đang bận xử lý dữ liệu, bạn thử lại sau nhé!', 'error');
                     } finally {
                         btnUpload.innerText = "✦ THẢ VÀO VŨ TRỤ GALAXY ✦";
                         btnUpload.disabled = false;
@@ -369,14 +369,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCancel.onclick = () => {
             // Hiện hộp thoại hỏi thăm trước khi thực sự xóa
             Swal.fire({
-                title: 'Cậu muốn cất lại sao?',
-                text: 'Khoảnh khắc này sẽ được gói ghém lại và tạm thời không bay vào Vũ trụ nữa nhé.',
+                title: 'Bạn muốn xóa bỏ sao ?',
+                text: 'Cảm ơn bạn đã chia sẻ cho Kén, hi vọng bạn sẽ vượt qua những điều khó khăn',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#333',     // Màu xám chìm cho nút đồng ý cất đi
                 cancelButtonColor: '#d4b06a',   // Màu vàng lấp lánh cho nút Đổi ý (giữ lại)
-                confirmButtonText: 'Đúng vậy, cất đi',
-                cancelButtonText: 'Mình đổi ý ✨',
+                confirmButtonText: 'Bỏ',
+                cancelButtonText: 'Mình đổi ý ',
                 background: '#050b14', color: '#fff'
             }).then((result) => {
                 // Chỉ khi người dùng bấm "Đúng vậy, cất đi" thì mới chạy lệnh xóa
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 6. Reset dòng text báo tên file ở dưới cùng
                     const txtDisplay = document.getElementById('file-name-display');
                     if (txtDisplay) {
-                        txtDisplay.innerText = "Cậu chưa chọn khoảnh khắc nào...";
+                        txtDisplay.innerText = "Bạn chưa chọn khoảnh khắc nào...";
                         txtDisplay.style.color = '#666';
                     }
                 }
