@@ -42,29 +42,28 @@ const checkAuth = async () => {
 
 // --- 3. Tải dữ liệu Real-time ---
 function loadAllPosts() {
-    const adminGrid = document.getElementById('adminGrid');
-    const approvedGrid = document.getElementById('approvedGrid');
+    const grids = {
+        pendingImage: document.getElementById('pendingImage'),
+        pendingVideo: document.getElementById('pendingVideo'),
+        approvedImage: document.getElementById('approvedImage'),
+        approvedVideo: document.getElementById('approvedVideo')
+    };
 
-    // Lắng nghe bài CHỜ DUYỆT (Sắp xếp mới nhất lên đầu)
-    const qPending = query(collection(db, "moments"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
-    onSnapshot(qPending, (snapshot) => {
-        adminGrid.innerHTML = "";
-        if (snapshot.empty) {
-            adminGrid.innerHTML = "<p style='color:#444; grid-column:1/-1; text-align:center; font-style:italic;'>Vũ trụ đang yên bình...</p>";
-            return;
-        }
-        snapshot.forEach(docSnap => renderCard(docSnap, adminGrid, 'pending'));
-    });
+    const q = query(collection(db, "moments"), orderBy("createdAt", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
+        // Xóa sạch nội dung cũ
+        Object.values(grids).forEach(g => g.innerHTML = "");
 
-    // Lắng nghe bài ĐÃ DUYỆT
-    const qApproved = query(collection(db, "moments"), where("status", "==", "approved"), orderBy("createdAt", "desc"));
-    onSnapshot(qApproved, (snapshot) => {
-        approvedGrid.innerHTML = "";
-        if (snapshot.empty) {
-            approvedGrid.innerHTML = "<p style='color:#444; grid-column:1/-1; text-align:center; font-style:italic;'>Chưa có bài nào tỏa sáng.</p>";
-            return;
-        }
-        snapshot.forEach(docSnap => renderCard(docSnap, approvedGrid, 'approved'));
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            // Xác định container dựa trên status và type
+            const targetKey = `${data.status}${data.type.charAt(0).toUpperCase() + data.type.slice(1)}`;
+            
+            if (grids[targetKey]) {
+                renderCard(docSnap, grids[targetKey], data.status);
+            }
+        });
     });
 }
 
