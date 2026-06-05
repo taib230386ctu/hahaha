@@ -1,9 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
-    getFirestore, collection, addDoc, query, orderBy, where, onSnapshot 
+    getFirestore, collection, addDoc, query, orderBy, where, onSnapshot, limit 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// --- 1. CẤU HÌNH FIREBASE ---
+// =========================================================
+// 1. CẤU HÌNH HỆ THỐNG (CONFIGURATIONS)
+// =========================================================
 const firebaseConfig = {
     apiKey: "AIzaSyC7BBc13wFAe73OrR-0qvwej7e8tARaJ1I",
     authDomain: "test01-34e19.firebaseapp.com",
@@ -17,15 +19,19 @@ const firebaseConfig = {
 const CLOUD_NAME = "dkn0v4yv2"; 
 const UPLOAD_PRESET = "phaken_preset"; 
 
+// Khởi tạo Firebase dịch vụ
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Biến toàn cục để "chốt" tên người dùng sau khi họ bấm Bắt đầu
+// Biến trạng thái toàn cục để khóa cứng tên người dùng sau khi xác thực hành trình
 let currentVisitorName = "";
 
+// =========================================================
+// 2. QUẢN LÝ SỰ KIỆN GIAO DIỆN (UI CONTROLLERS)
+// =========================================================
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- [A] MENU MOBILE (3 GẠCH) ---
+    // --- [A] XỬ LÝ MENU MOBILE (HAMBURGER BANNER) ---
     const menuToggle = document.querySelector('.menu-toggle');
     const menu = document.querySelector('.menu');
 
@@ -41,11 +47,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- [B] LƯU TÊN VÀ "MỞ KHÓA" FORM UPLOAD ---
+    // --- [B] XỬ LÝ XEM TRƯỚC FILE KHI CHỌN (PREVIEW ENGINE) ---
+    const fileInput = document.getElementById('imgFile');
+    const placeholder = document.getElementById('previewPlaceholder');
+    const imgPreview = document.getElementById('imagePreview');
+    const videoPreview = document.getElementById('videoPreview');
+    const fileNameDisplay = document.getElementById('file-name-display');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            imgPreview.style.display = 'none'; 
+            videoPreview.style.display = 'none'; 
+            videoPreview.src = ''; 
+            placeholder.style.display = 'block';
+
+            if (file) {
+                const fileType = file.type;
+                const fileUrl = URL.createObjectURL(file);
+                fileNameDisplay.innerHTML = `✨ Đã nhận: <b>${file.name}</b>`;
+                fileNameDisplay.style.color = '#f6d28d';
+                placeholder.style.display = 'none';
+
+                if (fileType.startsWith('image/')) {
+                    imgPreview.src = fileUrl; 
+                    imgPreview.style.display = 'block';
+                } else if (fileType.startsWith('video/')) {
+                    videoPreview.src = fileUrl; 
+                    videoPreview.style.display = 'block';
+                }
+            } else {
+                fileNameDisplay.innerText = "Cậu chưa chọn khoảnh khắc nào...";
+                fileNameDisplay.style.color = '#666';
+            }
+        });
+    }
+
+    // =========================================================
+    // 3. XỬ LÝ LOGIC FIREBASE & CLOUDINARY (CORE LOGIC)
+    // =========================================================
+
     const startBtn = document.querySelector('.start-btn');
     const nameInput = document.getElementById('visitorName');
-    const uploadSection = document.getElementById('uploadSection'); // Trỏ tới form upload đang bị ẩn
+    const uploadSection = document.getElementById('uploadSection');
 
+    // --- TÁC VỤ 1: GHI NHẬN DANH TÍNH VISITOR (FIREBASE FIRESTORE) ---
     if (startBtn && nameInput) {
         startBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -69,12 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     didOpen: () => { Swal.showLoading(); }
                 });
 
+                // Đẩy dữ liệu lưu vết người truy cập
                 await addDoc(collection(db, "visitors"), {
                     ten_nguoi_dung: userName,
                     ngay_gui: new Date()
                 });
 
-                // Chốt tên vào biến hệ thống để lát nữa lấy đem đi upload
+                // Chốt danh tính vào bộ nhớ tạm hệ thống để chuẩn bị cho bước đăng ảnh
                 currentVisitorName = userName;
 
                 Swal.fire({
@@ -85,10 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     confirmButtonColor: '#d4af37',
                     background: '#050b14', color: '#fff'
                 }).then(() => {
-                    // HIỆU ỨNG MỞ KHÓA: Sau khi tắt thông báo, hiện form upload và cuộn tới đó
                     if (uploadSection) {
-                        uploadSection.style.display = 'block'; // Hiển thị form
-                        // Delay nhẹ 1 chút để DOM kịp render trước khi cuộn
+                        uploadSection.style.display = 'block';
                         setTimeout(() => {
                             uploadSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }, 150);
@@ -96,53 +141,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
             } catch (err) {
-                console.error(err);
-                Swal.fire('Lỗi rồi!', 'Vũ trụ đang gặp sự cố, thử lại sau nhé!', 'error');
+                console.error("Firebase Visitor Error: ", err);
+                Swal.fire('Lỗi rồi!', 'Vũ trụ không thể ghi nhớ tên cậu lúc này, thử lại sau nhé!', 'error');
             }
         });
     }
 
-    // --- [C] XỬ LÝ KHUNG TẢI FILE XEM TRƯỚC ---
-    const fileInput = document.getElementById('imgFile');
-    const placeholder = document.getElementById('previewPlaceholder');
-    const imgPreview = document.getElementById('imagePreview');
-    const videoPreview = document.getElementById('videoPreview');
-    const fileNameDisplay = document.getElementById('file-name-display');
-
-    if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            imgPreview.style.display = 'none'; videoPreview.style.display = 'none'; videoPreview.src = ''; placeholder.style.display = 'block';
-            if (file) {
-                const fileType = file.type;
-                const fileUrl = URL.createObjectURL(file);
-                fileNameDisplay.innerHTML = `✨ Đã nhận: <b>${file.name}</b>`;
-                fileNameDisplay.style.color = '#f6d28d';
-                placeholder.style.display = 'none';
-                if (fileType.startsWith('image/')) {
-                    imgPreview.src = fileUrl; imgPreview.style.display = 'block';
-                } else if (fileType.startsWith('video/')) {
-                    videoPreview.src = fileUrl; videoPreview.style.display = 'block';
-                }
-            } else {
-                fileNameDisplay.innerText = "Cậu chưa chọn khoảnh khắc nào...";
-                fileNameDisplay.style.color = '#666';
-            }
-        });
-    }
-
-    // --- [D] UPLOAD LÊN CLOUDINARY KÈM TÊN ĐÃ "CHỐT" ---
     const btnUpload = document.getElementById('btnUpload');
     const imgTitle = document.getElementById('imgTitle');
 
+    // --- TÁC VỤ 2: ĐẨY FILE LÊN CLOUDINARY & LƯU THÔNG TIN MOMENT (FIREBASE) ---
     if (btnUpload) {
         btnUpload.onclick = async () => {
             const file = fileInput.files[0];
             const title = imgTitle.value.trim();
-            
-            // Lấy tên đã được lưu lúc bấm Bắt Đầu Hành Trình
             const author = currentVisitorName;
 
+            // Kiểm tra trạng thái đăng nhập/nhập tên hành trình
             if (!author) {
                 return Swal.fire({
                     title: 'Khoan đã...',
@@ -153,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
+            // Kiểm tra tính toàn vẹn dữ liệu form upload
             if (!file || !title) {
                 return Swal.fire({
                     title: 'Thiếu thông tin!',
@@ -163,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
+            // Xác nhận đẩy bài từ người dùng
             Swal.fire({
                 title: 'Thả vào Vũ trụ?',
                 html: `
@@ -178,16 +195,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
+                        // Khóa giao diện nút bấm tránh việc spam click gửi trùng file
                         btnUpload.innerText = `ĐANG BAY VÀO GALAXY...`;
                         btnUpload.disabled = true;
 
+                        // Khởi tạo luồng FormData đóng gói truyền lên Cloudinary API
                         const formData = new FormData();
                         formData.append('file', file);
                         formData.append('upload_preset', UPLOAD_PRESET);
 
-                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, { method: 'POST', body: formData });
+                        // Thực thi fetch API đẩy tệp tin đa phương tiện lên Cloudinary
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, { 
+                            method: 'POST', 
+                            body: formData 
+                        });
+                        
+                        if (!res.ok) throw new Error("Cloudinary API Upload Failed.");
                         const resultUpload = await res.json();
 
+                        // Nếu Cloudinary trả về URL an toàn thành công, tiến hành ghi vào Firestore
                         if (resultUpload.secure_url) {
                             await addDoc(collection(db, "moments"), {
                                 author: author, 
@@ -195,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 url: resultUpload.secure_url,
                                 public_id: resultUpload.public_id,
                                 type: resultUpload.resource_type,
-                                status: "pending",
+                                status: "pending", // Mặc định ở trạng thái chờ Admin duyệt
                                 createdAt: new Date()
                             });
 
@@ -205,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 icon: 'success', confirmButtonColor: '#d4b06a', background: '#050b14', color: '#fff'
                             });
 
+                            // Đồng bộ dọn dẹp trống Form sau khi hoàn tất chu trình gửi bài
                             imgTitle.value = ""; fileInput.value = "";
                             imgPreview.style.display = 'none'; videoPreview.style.display = 'none';
                             placeholder.style.display = 'block';
@@ -212,8 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             fileNameDisplay.style.color = '#666';
                         }
                     } catch (error) {
-                        console.error(error);
-                        Swal.fire('Lỗi rồi!', 'Vũ trụ đang gặp sự cố, thử lại sau nhé!', 'error');
+                        console.error("Upload Logic Error: ", error);
+                        Swal.fire('Lỗi rồi!', 'Hệ thống vũ trụ đang bận xử lý dữ liệu, cậu thử lại sau nhé!', 'error');
                     } finally {
                         btnUpload.innerText = "✦ THẢ VÀO VŨ TRỤ GALAXY ✦";
                         btnUpload.disabled = false;
@@ -223,21 +250,42 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // --- [E] HIỂN THỊ REAL-TIME KÈM TÊN ---
+    // --- TÁC VỤ 3: LẮNG NGHE DỮ LIỆU REAL-TIME & XEM THÊM ---
     const videoGrid = document.getElementById('videoGrid');
     const imageGrid = document.getElementById('imageGrid');
+    const btnLoadMoreVideo = document.getElementById('btnLoadMoreVideo');
+    const btnLoadMoreImage = document.getElementById('btnLoadMoreImage');
 
-    if (videoGrid) {
-        const qVideo = query(collection(db, "moments"), where("status", "==", "approved"), where("type", "==", "video"), orderBy("createdAt", "desc"));
-        onSnapshot(qVideo, (snapshot) => {
+    // Cài đặt giới hạn hiển thị mặc định
+    let currentVideoLimit = 6;
+    let currentImageLimit = 9;
+    
+    // Biến lưu trữ luồng lắng nghe (để ngắt luồng cũ khi tải thêm bài)
+    let unsubVideo = null;
+    let unsubImage = null;
+
+    // --- HÀM TẢI VIDEO ---
+    function loadVideos() {
+        if (unsubVideo) unsubVideo(); // Ngắt luồng cũ để tránh bị trùng lặp dữ liệu
+        
+        const qVideo = query(collection(db, "moments"), where("status", "==", "approved"), where("type", "==", "video"), orderBy("createdAt", "desc"), limit(currentVideoLimit));
+        
+        unsubVideo = onSnapshot(qVideo, (snapshot) => {
             videoGrid.innerHTML = ""; 
-            if (snapshot.empty) return videoGrid.innerHTML = `<p style="color:#444; text-align:center; grid-column:1/-1; font-family:'Montserrat', sans-serif; font-style:italic;">Chưa có thước phim nào được ghi lại... ✨</p>`;
+            if (snapshot.empty) {
+                videoGrid.innerHTML = `<p style="color:#444; text-align:center; grid-column:1/-1; font-family:'Montserrat', sans-serif; font-style:italic;">Chưa có thước phim nào được ghi lại... ✨</p>`;
+                if (btnLoadMoreVideo) btnLoadMoreVideo.style.display = 'none';
+                return;
+            }
+            
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const authorName = data.author ? data.author : "Người ẩn danh";
+                const posterUrl = data.url.replace(/\.[^/.]+$/, ".jpg");
+                
                 videoGrid.innerHTML += `
                     <div class="gallery-card">
-                        <video src="${data.url}" controls preload="metadata" style="width: 100%; height: 260px; object-fit: cover; background: #000;"></video>
+                        <video src="${data.url}" poster="${posterUrl}" controls preload="none" style="width: 100%; height: 260px; object-fit: cover; background: #000;"></video>
                         <div class="card-content">
                             <h3>${data.title}</h3>
                             <p style="color: var(--gold-light); font-weight: 600; margin-bottom: 5px; font-style: normal !important;">✦ Bởi: ${authorName}</p>
@@ -246,17 +294,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             });
+
+            // Thuật toán ẩn/hiện nút "Xem thêm"
+            if (snapshot.docs.length < currentVideoLimit && btnLoadMoreVideo) {
+                btnLoadMoreVideo.style.display = 'none'; // Hết bài rồi thì ẩn nút
+            } else if (btnLoadMoreVideo) {
+                btnLoadMoreVideo.style.display = 'inline-block'; // Còn bài thì hiện nút
+            }
         });
     }
 
-    if (imageGrid) {
-        const qImage = query(collection(db, "moments"), where("status", "==", "approved"), where("type", "==", "image"), orderBy("createdAt", "desc"));
-        onSnapshot(qImage, (snapshot) => {
+    // --- HÀM TẢI HÌNH ẢNH ---
+    function loadImages() {
+        if (unsubImage) unsubImage();
+        
+        const qImage = query(collection(db, "moments"), where("status", "==", "approved"), where("type", "==", "image"), orderBy("createdAt", "desc"), limit(currentImageLimit));
+        
+        unsubImage = onSnapshot(qImage, (snapshot) => {
             imageGrid.innerHTML = ""; 
-            if (snapshot.empty) return imageGrid.innerHTML = `<p style="color:#444; text-align:center; grid-column:1/-1; font-family:'Montserrat', sans-serif; font-style:italic;">Chưa có bức hình nào lấp lánh tại đây... ✨</p>`;
+            if (snapshot.empty) {
+                imageGrid.innerHTML = `<p style="color:#444; text-align:center; grid-column:1/-1; font-family:'Montserrat', sans-serif; font-style:italic;">Chưa có bức hình nào lấp lánh tại đây... ✨</p>`;
+                if (btnLoadMoreImage) btnLoadMoreImage.style.display = 'none';
+                return;
+            }
+
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const authorName = data.author ? data.author : "Người ẩn danh";
+                
                 imageGrid.innerHTML += `
                     <div class="gallery-card">
                         <img src="${data.url}" style="width: 100%; height: 260px; object-fit: cover;">
@@ -268,6 +333,100 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             });
+
+            // Thuật toán ẩn/hiện nút "Xem thêm"
+            if (snapshot.docs.length < currentImageLimit && btnLoadMoreImage) {
+                btnLoadMoreImage.style.display = 'none';
+            } else if (btnLoadMoreImage) {
+                btnLoadMoreImage.style.display = 'inline-block';
+            }
+        });
+    }
+
+    // Kích hoạt nạp dữ liệu lần đầu khi vào trang
+    if (videoGrid) loadVideos();
+    if (imageGrid) loadImages();
+
+    // Lắng nghe sự kiện click nút "Xem thêm"
+    if (btnLoadMoreVideo) {
+        btnLoadMoreVideo.addEventListener('click', () => {
+            currentVideoLimit += 6; // Cộng thêm 6 clip mỗi lần bấm
+            loadVideos();
+        });
+    }
+
+    if (btnLoadMoreImage) {
+        btnLoadMoreImage.addEventListener('click', () => {
+            currentImageLimit += 9; // Cộng thêm 9 hình mỗi lần bấm
+            loadImages();
+        });
+    }
+
+    // --- TÁC VỤ: XỬ LÝ NÚT "CẤT LẠI VÀO KÉN" (HỦY ĐĂNG VỚI XÁC NHẬN) ---
+    const btnCancel = document.getElementById('btnCancel');
+
+    if (btnCancel) {
+        btnCancel.onclick = () => {
+            // Hiện hộp thoại hỏi thăm trước khi thực sự xóa
+            Swal.fire({
+                title: 'Cậu muốn cất lại sao?',
+                text: 'Khoảnh khắc này sẽ được gói ghém lại và tạm thời không bay vào Vũ trụ nữa nhé.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#333',     // Màu xám chìm cho nút đồng ý cất đi
+                cancelButtonColor: '#d4b06a',   // Màu vàng lấp lánh cho nút Đổi ý (giữ lại)
+                confirmButtonText: 'Đúng vậy, cất đi',
+                cancelButtonText: 'Mình đổi ý ✨',
+                background: '#050b14', color: '#fff'
+            }).then((result) => {
+                // Chỉ khi người dùng bấm "Đúng vậy, cất đi" thì mới chạy lệnh xóa
+                if (result.isConfirmed) {
+                    // 1. Dọn dẹp tiêu đề
+                    const titleInput = document.getElementById('imgTitle');
+                    if (titleInput) {
+                        titleInput.value = "";
+                        titleInput.style.height = 'auto'; // Reset chiều cao textarea
+                    }
+
+                    // 2. Xóa sạch file đã chọn trong bộ nhớ hệ thống
+                    const inputTypeFile = document.getElementById('imgFile');
+                    if (inputTypeFile) inputTypeFile.value = "";
+
+                    // 3. Xóa luôn link (src) và ẩn khung Hình ảnh
+                    const imgView = document.getElementById('imagePreview');
+                    if (imgView) {
+                        imgView.src = "";
+                        imgView.style.display = 'none';
+                    }
+
+                    // 4. Xóa luôn link (src) và ẩn khung Video
+                    const vidView = document.getElementById('videoPreview');
+                    if (vidView) {
+                        vidView.src = "";
+                        vidView.style.display = 'none';
+                    }
+
+                    // 5. Hiển thị lại khối thông báo lấp lánh "Bấm vào đây để chọn..."
+                    const phBox = document.getElementById('previewPlaceholder');
+                    if (phBox) phBox.style.display = 'block';
+
+                    // 6. Reset dòng text báo tên file ở dưới cùng
+                    const txtDisplay = document.getElementById('file-name-display');
+                    if (txtDisplay) {
+                        txtDisplay.innerText = "Cậu chưa chọn khoảnh khắc nào...";
+                        txtDisplay.style.color = '#666';
+                    }
+                }
+            });
+        };
+    }
+
+    // --- XỬ LÝ TEXTAREA TỰ ĐỘNG CO GIÃN ---
+    const imgTitleTextarea = document.getElementById('imgTitle');
+    if (imgTitleTextarea) {
+        imgTitleTextarea.addEventListener('input', function () {
+            this.style.height = 'auto'; 
+            this.style.height = this.scrollHeight + 'px'; 
         });
     }
 });
