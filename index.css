@@ -38,7 +38,7 @@ body {
     top: 0; left: 0;
     width: 100%;
     z-index: 100;
-    background: rgba(5, 10, 18, .45);
+    background: rgb(5, 10, 18);
     border-bottom: 1px solid rgba(255, 255, 255, .05);
     
     /* Hiệu ứng sương mờ hạ cánh mềm mại khi tải trang */
