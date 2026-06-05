@@ -22,7 +22,8 @@
 body {
     /* Mặc định chữ thường đứng thẳng đứng, không nghiêng ríu mắt */
     font-family: var(--font-text);
-    background: #050b14;
+    background: background: linear-gradient(rgba(5, 11, 20, 0.6), rgba(5, 11, 20, 0.6)),
+                    url('./images/bg2.png') no-repeat center center/cover;
     color: white;
     overflow-x: hidden;
     overflow-y: scroll; /* Khóa thanh cuộn dọc cố định tránh lệch Nav */
