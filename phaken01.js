@@ -53,4 +53,31 @@ document.addEventListener('DOMContentLoaded', () => {
         slides[0].style.opacity = 1;
         setInterval(showSlides, 6000); 
     }
+
+    let index2n1d = 0;
+    const slides2n1d = document.querySelectorAll('.slide-2n1d');
+
+    function autoSlide2n1d() {
+        // 1. Đẩy ảnh cũ sang phải (exit)
+        slides2n1d[index2n1d].classList.remove('active');
+        slides2n1d[index2n1d].classList.add('exit');
+
+        // 2. Tính chỉ số mới
+        index2n1d = (index2n1d + 1) % slides2n1d.length;
+
+        // 3. Reset ảnh mới từ trái (vị trí -100%) rồi trượt vào
+        slides2n1d[index2n1d].classList.remove('exit');
+        slides2n1d[index2n1d].classList.add('active');
+
+        // Dọn dẹp class exit sau khi trượt xong để vòng lặp sau chạy đúng
+        setTimeout(() => {
+            slides2n1d.forEach(s => s.classList.remove('exit'));
+        }, 5000);
+    }
+
+    // Khởi tạo
+    if(slides2n1d.length > 0) {
+        slides2n1d[0].classList.add('active');
+        setInterval(autoSlide2n1d, 5000);
+    }
 });
